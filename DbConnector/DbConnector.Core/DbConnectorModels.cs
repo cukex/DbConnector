@@ -79,11 +79,14 @@ namespace DbConnector.Core
                 toAdd.Direction = item.Direction;
                 toAdd.SourceColumnNullMapping = item.SourceColumnNullMapping;
 
-                var pInfoOfDbType = toAdd.GetType().GetProperties().FirstOrDefault(p => p.CanWrite && p.PropertyType == item.DbTypeEnum.GetType());
-
-                if (pInfoOfDbType != null)
+                if (item.DbTypeEnum != null)
                 {
-                    pInfoOfDbType.SetValue(toAdd, item.DbTypeEnum);
+                    var pInfoOfDbType = toAdd.GetType().GetProperties().FirstOrDefault(p => p.CanWrite && p.PropertyType == item.DbTypeEnum.GetType());
+
+                    if (pInfoOfDbType != null)
+                    {
+                        pInfoOfDbType.SetValue(toAdd, item.DbTypeEnum);
+                    }
                 }
 
                 toReturn.Add(toAdd);
@@ -97,7 +100,8 @@ namespace DbConnector.Core
         {
             DbConnectorParameter toAdd = new DbConnectorParameter
             {
-                ParameterName = parameterName
+                ParameterName = parameterName,
+                Direction = ParameterDirection.Input
             };
             toAdd.SetDbTypeEnum<TDbTypeEnum>(dbType);
 
@@ -112,7 +116,8 @@ namespace DbConnector.Core
             DbConnectorParameter toAdd = new DbConnectorParameter
             {
                 ParameterName = parameterName,
-                Size = size
+                Size = size,
+                Direction = ParameterDirection.Input
             };
             toAdd.SetDbTypeEnum<TDbTypeEnum>(dbType);
 
@@ -128,7 +133,8 @@ namespace DbConnector.Core
             {
                 ParameterName = parameterName,
                 Size = size,
-                SourceColumn = sourceColumn
+                SourceColumn = sourceColumn,
+                Direction = ParameterDirection.Input
             };
             toAdd.SetDbTypeEnum<TDbTypeEnum>(dbType);
 
@@ -142,12 +148,31 @@ namespace DbConnector.Core
             DbConnectorParameter toAdd = new DbConnectorParameter
             {
                 ParameterName = parameterName,
-                Value = value
+                Value = value,
+                Direction = ParameterDirection.Input
             };
 
             this.Add(toAdd);
 
             return toAdd;
+        }
+
+        public void AddWithValues(object parametersObj)
+        {
+            var pInfos = parametersObj.GetType().GetProperties();
+
+            foreach (var p in pInfos)
+            {
+                if (p.CanRead)
+                {
+                    this.Add(new DbConnectorParameter()
+                    {
+                        ParameterName = p.Name,
+                        Value = p.GetValue(parametersObj),
+                        Direction = ParameterDirection.Input
+                    });
+                }
+            }
         }
 
         IEnumerator<IDbConnectorParameter> IEnumerable<IDbConnectorParameter>.GetEnumerator()
