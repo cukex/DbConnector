@@ -1,2 +1,2 @@
 # DbConnector
-a database connector for .Net
+a database connector and micro ORM for .Net
