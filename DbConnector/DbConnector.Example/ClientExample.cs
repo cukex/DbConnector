@@ -28,7 +28,7 @@ namespace DbConnector.Example
 
         public async Task<Employee> GetEmployee(int id)
         {
-            //The use of Task/Async allowa us to make multiple asynchronous calls
+            //The use of Task/Async allows us to make multiple asynchronous calls
             //to the database leveraging the Task.WaitAll architecture
 
             return await _pdrEmployee.GetSingle(id);
